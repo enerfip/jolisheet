@@ -13,7 +13,7 @@ module Jolisheet
 
     def self.column(label, definition, formatter = nil)
       if definition.kind_of?(Symbol)
-        local_definition = ->(resource) { resource.public_send(definition) }
+        local_definition = ->(resource, _sheet) { resource.public_send(definition) }
       else
         local_definition = definition
       end
@@ -65,7 +65,11 @@ module Jolisheet
 
     def row(resource)
       definitions.map { |definition|
-        __send__("format_#{definition[:formatter]}", definition[:definition].call(resource))
+        if definition[:definition].arity == 2
+          __send__("format_#{definition[:formatter]}", definition[:definition].call(resource, self))
+        else
+          __send__("format_#{definition[:formatter]}", definition[:definition].call(resource))
+        end
       }
     end
 
