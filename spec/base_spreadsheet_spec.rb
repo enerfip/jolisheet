@@ -5,9 +5,9 @@ RSpec.describe BaseSpreadsheet do
     sheet_name "some sheet"
 
     column "Id", :id
-    column "Other field", ->(resource) { resource.test_field }
-    money "Amount", :amount
-    bool "Bool field", :bool_field
+    column "Other field", ->(resource) { resource.test_field }, sets: [:marketing]
+    money "Amount", :amount, sets: [:accounting]
+    bool "Bool field", :bool_field, sets: [:accounting, :marketing]
     date "date", :date
   end
 
@@ -54,6 +54,18 @@ RSpec.describe BaseSpreadsheet do
       expect(subject.header).to eq ["Amount", "Bool field", "date"]
       expect(subject.data).to eq [[100.0, "NON", "01/12/2012"], [0.0, "OUI", "-"]]
     end
+  end
+
+  describe "#sets" do
+    it { expect(DummySpreadsheet.sets).to match_array [:accounting, :marketing] }
+  end
+
+  describe "#available_columns" do
+    it {
+      expect(DummySpreadsheet.available_columns).to eq ["Id","Other field","Amount","Bool field","date"]
+      expect(DummySpreadsheet.available_columns(:marketing)).to eq ["Other field","Bool field"]
+      expect(DummySpreadsheet.available_columns(:accounting)).to eq ["Amount","Bool field"]
+    }
   end
 
   describe "#generate_xls" do

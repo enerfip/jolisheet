@@ -7,21 +7,25 @@ module Jolisheet
       @sheet_name = sh_name
     end
 
-    def self.available_columns
-      columns.map { |col| col[:label] }
+    def self.available_columns(set = nil)
+      columns.select { |col| set.blank? || col[:sets].include?(set) }.map { |col| col[:label] }
+    end
+
+    def sets
+      columns.flat_map { |col| col[:sets] }.uniq 
     end
 
     def self.columns
       @columns ||= []
     end
 
-    def self.column(label, definition, formatter = nil)
+    def self.column(label, definition, formatter = nil, sets: [])
       if definition.kind_of?(Symbol)
         local_definition = ->(resource, _sheet) { resource.public_send(definition) }
       else
         local_definition = definition
       end
-      self.columns << { label: label, definition: local_definition, formatter: formatter || :bypass }
+      self.columns << { label: label, definition: local_definition, formatter: formatter || :bypass, sets: sets }
     end
 
     def self.date(label, definition)
