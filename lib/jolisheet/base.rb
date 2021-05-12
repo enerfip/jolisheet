@@ -1,10 +1,14 @@
 module Jolisheet
   class Base
-    attr_reader :collection
+    attr_reader :collection, :chosen_columns
 
     def self.sheet_name(sh_name = nil)
       return @sheet_name if sh_name.nil?
       @sheet_name = sh_name
+    end
+
+    def self.available_columns
+      columns.map { |col| col[:label] }
     end
 
     def self.columns
@@ -32,7 +36,14 @@ module Jolisheet
       column(label, definition, :bool)
     end
 
-    def initialize(collection)
+    def initialize(collection, only: nil, except: nil)
+      if [only, except].reject(&:nil?).size > 1
+        raise "You must specify only one of :only or :expect if you want to customize columns list"
+      end
+
+      @chosen_columns = self.class.available_columns & only if only.present?
+      @chosen_columns = self.class.available_columns - except if except.present?
+
       @collection = collection
     end
 
@@ -60,7 +71,7 @@ module Jolisheet
     end
 
     def header
-      self.class.columns.map { |c| c[:label] }
+      chosen_columns
     end
 
     def row(resource)
@@ -108,7 +119,7 @@ module Jolisheet
     end
 
     def definitions
-      self.class.columns
+      self.class.columns.select { |col| chosen_columns.include? col[:label] }
     end
   end
 end

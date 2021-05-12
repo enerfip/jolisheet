@@ -20,6 +20,7 @@ RSpec.describe BaseSpreadsheet do
   subject { DummySpreadsheet.new(collection) }
 
   it { expect(DummySpreadsheet.columns.size).to eq 5 }
+
   it "renders data" do
     expect(subject.data).to eq [["1", "field", 100.0, "NON", "01/12/2012"], ["2", "field2", 0.0, "OUI", "-"]]
   end
@@ -30,6 +31,29 @@ RSpec.describe BaseSpreadsheet do
 
   it "knows sheet name" do
     expect(subject.sheet_name).to eq "some sheet"
+  end
+
+  context "specifying both `only` and `except` option" do
+    subject { DummySpreadsheet.new(collection, only: ["Id"], except: ["Other field"]) }
+    it "raises" do
+      expect { subject }.to raise_error "You must specify only one of :only or :expect if you want to customize columns list"
+    end
+  end
+
+  context "specifying `only` option" do
+    subject { DummySpreadsheet.new(collection, only: ["Id", "Other field", "Unknown field"]) }
+    it "renders only selected, existing columns" do
+      expect(subject.header).to eq ["Id", "Other field"]
+      expect(subject.data).to eq [["1", "field"], ["2", "field2"]]
+    end
+  end
+
+  context "specifying `except` option" do
+    subject { DummySpreadsheet.new(collection, expect: ["Id", "Other field", "Unknown field"]) }
+    it "renders all columns but specified columns" do
+      expect(subject.header).to eq ["Amount", "Bool field", "date"]
+      expect(subject.data).to eq [[100.0, "NON", "01/12/2012"], [0.0, "OUI", "-"]]
+    end
   end
 
   describe "#generate_xls" do

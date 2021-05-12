@@ -27,3 +27,14 @@ end
   spreadsheet = ProjectsSpreadsheet.new Project.all
   send_data spreadsheet.generate_xls, filename: "projects.xls"
 ```
+
+#### Selecting or excluding columns
+
+```ruby
+
+  spreadsheet = ProjectsSpreadsheet.new Project.all, only: ["ID", "Owner"]
+  send_data spreadsheet.generate_xls, filename: "projects.xls"
+
+  spreadsheet = ProjectsSpreadsheet.new Project.all, except: ["ID", "Owner"]
+  send_data spreadsheet.generate_xls, filename: "projects.xls"
+```
