@@ -28,16 +28,16 @@ module Jolisheet
       self.columns << { label: label, definition: local_definition, formatter: formatter || :bypass, sets: sets }
     end
 
-    def self.date(label, definition)
-      column(label, definition, :date)
+    def self.date(label, definition, sets: [])
+      column(label, definition, :date, sets: sets)
     end
 
-    def self.money(label, definition)
-      column(label, definition, :money)
+    def self.money(label, definition, sets: [])
+      column(label, definition, :money, sets: sets)
     end
 
-    def self.bool(label, definition)
-      column(label, definition, :bool)
+    def self.bool(label, definition, sets: [])
+      column(label, definition, :bool, sets: sets)
     end
 
     def initialize(collection, only: nil, except: nil)
@@ -47,6 +47,7 @@ module Jolisheet
 
       @chosen_columns = self.class.available_columns & only if only.present?
       @chosen_columns = self.class.available_columns - except if except.present?
+      @chosen_columns ||= self.class.available_columns
 
       @collection = collection
     end
