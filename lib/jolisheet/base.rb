@@ -1,38 +1,54 @@
 module Jolisheet
   class Base
-    attr_reader :collection
+    attr_reader :collection, :chosen_columns
 
     def self.sheet_name(sh_name = nil)
       return @sheet_name if sh_name.nil?
       @sheet_name = sh_name
     end
 
+    def self.available_columns(set = nil)
+      columns.select { |col| set.blank? || col[:sets].include?(set) }.map { |col| col[:label] }
+    end
+
+    def sets
+      columns.flat_map { |col| col[:sets] }.uniq 
+    end
+
     def self.columns
       @columns ||= []
     end
 
-    def self.column(label, definition, formatter = nil)
+    def self.column(label, definition, formatter = nil, sets: [])
       if definition.kind_of?(Symbol)
         local_definition = ->(resource, _sheet) { resource.public_send(definition) }
       else
         local_definition = definition
       end
-      self.columns << { label: label, definition: local_definition, formatter: formatter || :bypass }
+      self.columns << { label: label, definition: local_definition, formatter: formatter || :bypass, sets: sets }
     end
 
-    def self.date(label, definition)
-      column(label, definition, :date)
+    def self.date(label, definition, sets: [])
+      column(label, definition, :date, sets: sets)
     end
 
-    def self.money(label, definition)
-      column(label, definition, :money)
+    def self.money(label, definition, sets: [])
+      column(label, definition, :money, sets: sets)
     end
 
-    def self.bool(label, definition)
-      column(label, definition, :bool)
+    def self.bool(label, definition, sets: [])
+      column(label, definition, :bool, sets: sets)
     end
 
-    def initialize(collection)
+    def initialize(collection, only: nil, except: nil)
+      if [only, except].reject(&:nil?).size > 1
+        raise "You must specify only one of :only or :expect if you want to customize columns list"
+      end
+
+      @chosen_columns = self.class.available_columns & only if only.present?
+      @chosen_columns = self.class.available_columns - except if except.present?
+      @chosen_columns ||= self.class.available_columns
+
       @collection = collection
     end
 
@@ -60,7 +76,7 @@ module Jolisheet
     end
 
     def header
-      self.class.columns.map { |c| c[:label] }
+      chosen_columns
     end
 
     def row(resource)
@@ -108,7 +124,7 @@ module Jolisheet
     end
 
     def definitions
-      self.class.columns
+      self.class.columns.select { |col| chosen_columns.include? col[:label] }
     end
   end
 end
