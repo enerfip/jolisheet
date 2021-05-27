@@ -11,7 +11,7 @@ module Jolisheet
       columns.select { |col| set.blank? || col[:sets].include?(set) }.map { |col| col[:label] }
     end
 
-    def sets
+    def self.sets
       columns.flat_map { |col| col[:sets] }.uniq 
     end
 
