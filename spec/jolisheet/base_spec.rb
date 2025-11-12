@@ -75,5 +75,15 @@ RSpec.describe Jolisheet::Base do
     it 'creates rows with header and body' do
       expect(subject.generate_xls).to be_kind_of String
     end
+
+    context 'with debug mode on' do
+      before do
+        subject.debug = true
+      end
+
+      it 'outputs processing messages' do
+        expect { subject.generate_xls }.to output(/Processing rows 0 to 2/).to_stdout
+      end
+    end
   end
 end

@@ -68,8 +68,8 @@ module Jolisheet
     def create_body
       add_worksheet do |sheet|
         sheet.add_row header
-        collection.each_slice(500) do |rows|
-          puts "Processing rows #{rows.first.id} to #{rows.last.id}" if debug
+        collection.each_slice(500).with_index do |rows, index|
+          puts "Processing rows #{rows.size * index} to #{rows.size * (index + 1)}" if debug
           rows.each do |resource|
             sheet.add_row row(resource)
           end
