@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activesupport/core_ext'
+  spec.add_dependency 'activesupport'
   spec.add_dependency 'caxlsx'
   spec.add_dependency 'rake'
 end
